@@ -1,3 +1,5 @@
+_effects={}
+
 function _effects_u()
     for fx in all(_effects) do
         --lifetime

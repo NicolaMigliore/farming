@@ -1,9 +1,16 @@
 function _land_e()
     _cursor={cx=8,cy=8}
-    _tools={'hoe','seeds','water'}
+    _tools={
+        {l='hoe',s=64},
+        {l='seeds',s=65},
+        {l='water',s=66},
+        {l='harvest',s=67}
+    }
     _tool_i=1
 
     _screen=load_screen()
+
+    menu_open=false
 end
 
 function _land_u()
@@ -40,9 +47,10 @@ function _land_u()
         end
     end
 
-    if btn(4) then
-        if(btnp(⬆️))_tool_i+=1
-        if(btnp(⬇️))_tool_i-=1
+    if (btnp(4)) menu_open=not menu_open add_timer('menu_toggle',.5)
+    if menu_open then
+        if(btnp(⬆️))_tool_i-=1
+        if(btnp(⬇️))_tool_i+=1
         if(_tool_i<1)_tool_i=#_tools
         if(_tool_i>#_tools)_tool_i=1
     else
@@ -97,13 +105,31 @@ function _land_d()
     -- cursor
     local shr=flr(sin(t()))*2
     rectc(_cursor.cx*8+4,_cursor.cy*8+4,6+shr,6+shr)
-    -- tools
-    for i,t in pairs(_tools) do
-        if i==_tool_i then
-            pl(t,2,i*8,'left',7,1)
-        else
-            pl(t,2,i*8,'left',1)
+
+    
+    if not menu_open then
+        window(2,10,13,13)
+        rectfill(4,12,13,21,13)
+        sprc(_tools[_tool_i].s,9,17)
+    end
+    local menu_timer = get_timer('menu_toggle')
+    if menu_timer then
+        local w = 50
+        local perc = ease_in_out_back(menu_timer.perc)
+        local x,y=-w+(menu_open and w*perc or w*(1-perc)),10
+        window(x,y,w,y+50)
+        -- tools
+        for i,t in pairs(_tools) do
+            local ty=y+i*10
+            if i==_tool_i then
+                rectfill(x+3,ty-5,x+w-3,ty+4,13)
+                pl(t.l,x+5,ty,'left',7,1)
+            else
+                pl(t.l,x+5,ty,'left',1)
+            end
+            sprc(t.s,x+w-7,ty)
         end
+
     end
 end
 

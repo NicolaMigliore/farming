@@ -2,7 +2,6 @@ function _init()
     -- cartdata('elfamir_farming_0')
     _deb=nil
     _mode = ''
-    _effects={}
     _show_grow=false
     _show_water=true
     _show_empty=false
@@ -29,6 +28,7 @@ end
 function _update()
     _scenes[_mode].upd()
     _effects_u()
+    _timers_u()
 end
 
 function _draw()
@@ -51,7 +51,6 @@ end
 function set_scene(s,params)
     _mode = s
     _camera={x=0,y=0}
-    -- _timers = {}
     -- _title_cards = {}
     local params = params or {}
     _scenes[s].ent(unpack(params))
