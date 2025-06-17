@@ -3,13 +3,26 @@ function new_tile(cx,cy,sprites,grow_sequence)
         cx=cx,
         cy=cy,
         ss=sprites or {},
-        grow_sequence=grow_sequence or {},
-        age=0,
-        grow_age=60,
+        grow_sequence=grow_sequence or {6,8,10,12}, -- {},
+        grow_stage=1,
+        grow_timer=1,
+        dry_sequence={7,9,11,13},
+        dry_timer=1,
         draw=function(self)
             for ln in all(_layer_names) do
                 local s=self.ss[ln]
-                if(s and s>-1)spr(s,self.cx*8,self.cy*8)
+                if s and (s~=16 or _show_empty) then
+                    local sx,sy=self.cx*8,self.cy*8
+                    spr(s,sx,sy)
+                    if fget(s,2) and _show_grow then
+                        line(sx+1,sy-1,sx+7,sy-1,2)
+                        line(sx+1,sy-1,sx+1+7*self.grow_timer,sy-1,8)
+                    end
+                    if fget(s,2) and _show_water then
+                        line(sx+1,sy,sx+7,sy,1)
+                        line(sx+1,sy,sx+1+7*max(0,self.dry_timer),sy,12)
+                    end
+                end
             end
         end
     }
@@ -21,18 +34,13 @@ function get_tile(screen,cx,cy)
     return nil
 end
 
--- execute function on all tiles in the given layer
--- @param f Function in the form function(tile,x,y,layer_name)
-function foralltiles_l(layer,l_name,f)
-    for i=0,#layer do
-        local row=layer[i]
-        if row then
-            for j=0,#layer[i] do
-                local tile=layer[i][j]
-                f(tile,j,i,l_name)
-            end
-        end
-    end
+-- set the harvest layer of a tile
+function set_harvest(screen,cx,cy,s)
+    local ct = screen[cy][cx]
+    ct.ss.harvest=s
+    ct.grow_timer=1
+    ct.grow_stage=1
+    ct.dry_timer=1
 end
 
 -- execute function on all tiles in the given screen

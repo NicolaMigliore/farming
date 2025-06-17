@@ -2,7 +2,13 @@ function _init()
     -- cartdata('elfamir_farming_0')
     _deb=nil
     _mode = ''
+    _effects={}
+    _show_grow=false
+    _show_water=true
+    _show_empty=false
+    _debug_layer=nil --'harvest'
 
+    
     _scenes = {
         land = {
             ent=_land_e,
@@ -12,26 +18,8 @@ function _init()
     }
 
     _layer_names={'ground','harvest'}
-    -- _screen={
-    --     ground={},
-    --     water={},
-    --     harvest={},
-    --     structs={}
-    -- }
-    -- for k,l in pairs(_screen) do
-    --     local layer = {}
-    --     for i=0,15 do
-    --         layer[i] = {}
-    --         for j=0,15 do
-    --             local s = -1
-    --             if(k=='ground')s=1
-    --             local tile = new_tile(k,j,i,s)
-    --             layer[i][j] = tile
-    --         end
-    --     end
-    --     _screen[k] = layer
-    -- end
     _screen={}
+    -- clear_data()
 
 
     set_scene('land')
@@ -40,12 +28,23 @@ end
 
 function _update()
     _scenes[_mode].upd()
+    _effects_u()
 end
 
 function _draw()
     cls()
     _scenes[_mode].drw()
+    _effects_d()
 
+    if _debug_layer then
+        for i=0,15 do
+            local row=_screen[i]
+            for j=0,15 do
+                local tile=_screen[i][j]
+                pl(tile.ss[_debug_layer], j*8+4, i*8+4, 'center')
+            end
+        end
+    end
     if(_deb)print(_deb,1,120)
 end
 
