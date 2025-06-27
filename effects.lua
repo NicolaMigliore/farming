@@ -25,15 +25,19 @@ end
 function _effects_d()
     for fx in all(_effects) do
         --draw pixel for size 1, draw circle for larger
-        if fx.r<=1 then
-            pset(fx.x,fx.y,fx.c)
-        else
-            circfill(fx.x,fx.y,fx.r,fx.c)
+        if fx.r  then
+            if fx.r<=1 then
+                pset(fx.x,fx.y,fx.c)
+            else
+                circfill(fx.x,fx.y,fx.r,fx.c)
+            end
+        elseif fx.msg then
+            pl(fx.msg,fx.x,fx.y,'center',fx.c_table[1],fx.c_table[2])
         end
     end    
 end
 
-function add_fx(x,y,die,dx,dy,grav,grow,shrink,r,c_table)
+function add_fx(x,y,die,dx,dy,grav,grow,shrink,r,c_table,msg)
     local fx={
         x=x,
         y=y,
@@ -46,7 +50,8 @@ function add_fx(x,y,die,dx,dy,grav,grow,shrink,r,c_table)
         shrink=shrink,
         r=r,
         c=0,
-        c_table=c_table
+        c_table=c_table,
+        msg=msg                     -- text
     }
     add(_effects,fx)
 end

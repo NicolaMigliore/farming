@@ -14,6 +14,7 @@ Flags 4 to 7 indicate if the current tile has dirt on it's borders in the order 
 The flags indicate the status of the harvestable
 - 4 is hydrated
 - 5 is rotten
+- 6 is harvestable
 
 # Save map
 To save the game map, all used tiles are set in the PICO-8 map and then stored to the cart.

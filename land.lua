@@ -4,7 +4,7 @@ function _land_e()
         {l='hoe',s=64},
         {l='seeds',s=65},
         {l='water',s=66},
-        {l='harvest',s=67}
+        {l='sickle',s=67}
     }
     _tool_i=1
 
@@ -15,45 +15,49 @@ end
 
 function _land_u()
 -- input
-    if btnp(5) then
-        local cx,cy=_cursor.cx,_cursor.cy
-        local ct = get_tile(_screen,cx,cy)
-        local is_dirt = fget(ct.ss.ground,0)
-        local has_plant = ct.ss.harvest~=16
-        -- hoe
-        if _tool_i==1 then
-            ct.grow_stage=1
-            ct.grow_timer=0
-            if has_plant then
-                set_harvest(_screen,cx,cy,16)
-            else
-                till_ground(cx,cy,ct)
-            end
-        end
-
-        -- seeds
-        if _tool_i==2 then
-            if is_dirt and not has_plant then
-                set_harvest(_screen,cx,cy,6)
-            end
-        end
-
-        -- water
-        if _tool_i==3 then
-            if has_plant then
-                ct.dry_timer=1
-                if(ct.dry_timer>.2)ct.ss.harvest=ct.grow_sequence[ct.grow_stage]
-            end
-        end
-    end
 
     if (btnp(4)) menu_open=not menu_open add_timer('menu_toggle',.5)
     if menu_open then
+        if(btnp(5))menu_open=false add_timer('menu_toggle',.5)
         if(btnp(⬆️))_tool_i-=1
         if(btnp(⬇️))_tool_i+=1
         if(_tool_i<1)_tool_i=#_tools
         if(_tool_i>#_tools)_tool_i=1
     else
+        if btnp(5) then
+            local cx,cy=_cursor.cx,_cursor.cy
+            local ct = get_tile(_screen,cx,cy)
+            local is_dirt = fget(ct.ss.ground,0)
+            local has_plant = ct.ss.harvest~=16
+            local is_harvestable = fget(ct.ss.harvest,6)
+            -- hoe
+            if _tool_i==1 then
+                ct.grow_stage=1
+                ct.grow_timer=0
+                if has_plant then
+                    set_harvest(_screen,cx,cy,16)
+                else
+                    till_ground(cx,cy,ct)
+                end
+            end
+            -- seeds
+            if _tool_i==2 and is_dirt and not has_plant then
+                set_harvest(_screen,cx,cy,6)
+                local t = _screen[cy][cx]
+            end
+
+            -- water
+            if _tool_i==3 and has_plant then
+                ct.dry_timer=1
+                if(ct.dry_timer>.2)ct.ss.harvest=ct.grow_sequence[ct.grow_stage]
+            end
+
+            -- sickle
+            if _tool_i==4 and is_harvestable then
+                ct:harvest()
+            end
+        end
+
         if(btnp(➡️))_cursor.cx=min(_cursor.cx+1,15)
         if(btnp(⬅️))_cursor.cx=max(_cursor.cx-1,0)
         if(btnp(⬆️))_cursor.cy=max(_cursor.cy-1,0)

@@ -24,6 +24,15 @@ function new_tile(cx,cy,sprites,grow_sequence)
                     end
                 end
             end
+        end,
+        harvest=function(self)
+            local amount=1+flr(rnd()*self.dry_timer*3)
+            _inventory.carrots+=amount
+            add_fx(self.cx*8+4,self.cy*8+4,10,0,rnd()-1.5,false,false,false,nil,{7,1},'+'..amount)
+            self.ss.harvest=16
+            self.grow_timer=1
+            self.grow_stage=1
+            self.dry_timer=1
         end
     }
 end

@@ -15,11 +15,10 @@ function _init()
             drw=_land_d
         }
     }
-
+    _inventory={ carrots=0 }
     _layer_names={'ground','harvest'}
     _screen={}
     -- clear_data()
-
 
     set_scene('land')
     menuitem(1, "save", function()save_screen(_screen)end)
