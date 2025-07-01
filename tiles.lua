@@ -72,3 +72,20 @@ function new_screen(layer_g,layer_w,layer_h,layer_s)
         structs=layer_s
     }
 end
+
+function update_crops(screen)
+    local elapsed_mins = dget(5)
+    log('updating crops for '..elapsed_mins..' minutes')
+    foralltiles_s(screen, function(ct,x,y)
+        local is_harvestable=fget(ct.ss.harvest,2)
+        if is_harvestable then
+            -- dry
+            local d_rate = 1/(_d_frame_amount/30/60)
+            ct.dry_timer-=d_rate * elapsed_mins
+
+            -- grow
+            local g_rate = 1/(_g_frame_amount/30/60)
+            ct.grow_timer-=g_rate * elapsed_mins
+        end
+    end)
+end

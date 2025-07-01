@@ -24,11 +24,22 @@ function circle_rect_collision(cx,cy,radius,rx,ry,rw,rh)
 end
 
 -- sprite centered
-function sprc(n,x,y,w,h)
+function sprc(n,x,y,w,h,oc)
     w = w or 8
     h = h or w
     x = x - w/2
     y = y - h/2
+
+    -- outline
+    if oc then
+        for i=1,15 do pal(i,oc) end
+        spr(n,x-1,y)
+        spr(n,x+1,y)
+        spr(n,x,y-1)
+        spr(n,x,y+1)
+        pal()
+    end
+
     spr(n,x,y)
 end
 function ssprc(sx,sy,sw,sh,dx,dy,dw,dh,fx)
@@ -153,4 +164,19 @@ function rect_rect(r1x,r1y,r1w,r1h,r2x,r2y,r2w,r2h)
         return true
     end
     return false
+end
+
+-- print out a table - for debug
+function tableout(t,deep)
+ deep=deep or 0
+ local str=sub("    ",1,deep)
+ log(str.."table size: "..#t) 
+ for k,v in pairs(t) do
+   if type(v)=="table" then
+     log(str..tostr(k).."[]")
+     tableout(v,deep+1)
+   else
+     log(str..tostr(k).." = "..tostr(v))
+   end
+ end
 end

@@ -1,14 +1,8 @@
 function _land_e()
     _cursor={cx=8,cy=8}
-    _tools={
-        {l='hoe',s=64},
-        {l='seeds',s=65},
-        {l='water',s=66},
-        {l='sickle',s=67}
-    }
-    _tool_i=1
 
     _screen=load_screen()
+    update_crops(_screen)
 
     menu_open=false
 end
@@ -69,8 +63,8 @@ function _land_u()
         local is_harvestable=fget(tile.ss.harvest,2)
         if is_harvestable then
             -- dry
-            local d_chance=.3
-            if(rnd()<d_chance and tile.dry_timer>0)tile.dry_timer-=1/120
+            local d_rate=1/_d_frame_amount
+            tile.dry_timer-=d_rate
             if tile.dry_timer<=.2 then
                 tile.ss.harvest=tile.dry_sequence[tile.grow_stage]
                 if rnd()<.002 then
@@ -85,8 +79,8 @@ function _land_u()
             end
 
             -- grow
-            local g_chance=.4
-            if(rnd()<g_chance and tile.grow_timer>0 and tile.dry_timer>.2)tile.grow_timer-=1/240
+            local g_rate = 1/_g_frame_amount
+            tile.grow_timer-=g_rate
             if tile.grow_timer<0 and tile.grow_stage<#tile.grow_sequence then
                 tile.grow_stage+=1
                 tile.grow_timer=1
@@ -133,8 +127,12 @@ function _land_d()
             end
             sprc(t.s,x+w-7,ty)
         end
-
     end
+
+    -- inventory
+    window(-15,110,40,20)
+    sprc(14,7,121,nil,nil,1)
+    pl(_inventory.carrots,16,122,'center',7,1)
 end
 
 function till_ground(cx,cy,ct)

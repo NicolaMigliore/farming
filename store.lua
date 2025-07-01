@@ -16,13 +16,18 @@ function save_screen(screen)
         local data_address = 0x4300+(x+y*16)*3
         poke(data_address,tile.grow_stage)
         poke(data_address+1,flr(tile.grow_timer * 100))
-        poke(data_address+2,flr(tile.dry_timer*100))
+        local tmp_dry = tile.dry_timer*100
+        if(tmp_dry ~= 0)log('dry-timer save: '..tmp_dry)
+        poke(data_address+2,flr(tmp_dry))
     end)
     cstore(0x2000,0x2000,8192)
     cstore(0x4300,0x4300,4864)
+
+    save_state()
 end
 
 function load_screen()
+    log('loading screen')
     local screen = {}
     -- create empty tiles
     for i=0,15 do
@@ -44,7 +49,9 @@ function load_screen()
         local data_address = 0x4300+(x+y*16)*3
         tile.grow_stage = @data_address
         tile.grow_timer = @(data_address+1)/100
-        tile.dry_timer = @(data_address+2)/100
+        local tmp_dry = @(data_address+2)/100
+        if(tmp_dry ~= 0)log('dry-timer load: '..tmp_dry)
+        tile.dry_timer = tmp_dry
     end)
     return screen
 end
@@ -75,4 +82,57 @@ function clear_data()
 
     cstore(0x2000,0x2000,8192)
     cstore(0x4300,0x4300,4864)
+
+    -- clear state
+    for i=0,4 do
+        dset(i,0)
+    end
+end
+
+function save_state()
+    -- save time @TODO: write in for loop
+    dset(0,stat(80)) -- y
+    dset(1,stat(81)) -- m
+    dset(2,stat(82)) -- d
+    dset(3,stat(83)) -- h
+    dset(4,stat(84)) -- mi
+
+    dset(6,_tool_i)
+    dset(7,_inventory.carrots)
+
+    log('save at '..dget(3)..':'..dget(4))
+end
+
+function load_state()
+    local dt = {}   -- delta time
+    _last_time = {}
+    for i=0,4 do
+        local last,cur= dget(i),stat(80+i)
+        add(_last_time,last)
+        add(dt,cur-last)
+    end
+
+    -- Adjust for negative differences
+    local y,m,d,h,mi = dt[1],dt[2],dt[3],dt[4],dt[5]
+    if mi < 0 then mi += 60 h -= 1 end
+    if h  < 0 then h  += 24 d -= 1 end
+    if d < 0 then d += 30 m -= 1 end -- approximate
+    if m < 0 then m += 12 y -= 1 end
+
+    -- elapsed time
+    local elapsed_time = 0
+    if y>0 or m>0 then
+        elapsed_time = 10080
+    else
+        elapsed_time = ((d * 24) + (h * 60) + mi)
+    end
+    log('------')
+    log('loaded '..dget(3)..':'..dget(4))
+    tableout(dt)
+    dset(5,elapsed_time)
+
+    -- last time 17:19
+
+    _tool_i = dget(6)
+    _inventory.carrots = dget(7)
 end

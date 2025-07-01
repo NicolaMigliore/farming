@@ -1,13 +1,16 @@
 function _init()
-    -- cartdata('elfamir_farming_0')
+    cartdata('elfamir_farming_0')
     _deb=nil
     _mode = ''
-    _show_grow=false
+    _show_grow=true
     _show_water=true
     _show_empty=false
     _debug_layer=nil --'harvest'
 
-    
+    _d_frame_amount = 3600 -- 2min --108000
+    _g_frame_amount = 900--5400 -- 3min --108000
+
+    _last_time = {}
     _scenes = {
         land = {
             ent=_land_e,
@@ -16,18 +19,29 @@ function _init()
         }
     }
     _inventory={ carrots=0 }
+    _tools={
+        {l='hoe',s=64},
+        {l='seeds',s=65},
+        {l='water',s=66},
+        {l='sickle',s=67}
+    }
+    _tool_i=1
     _layer_names={'ground','harvest'}
     _screen={}
     -- clear_data()
 
-    set_scene('land')
     menuitem(1, "save", function()save_screen(_screen)end)
+    load_state()
+    set_scene('land')
 end
 
 function _update()
     _scenes[_mode].upd()
     _effects_u()
     _timers_u()
+
+    -- -- autosave
+    -- if(time()%15==0)save_state()add_fx(64,5,60,0,0,false,false,false,nil,{7,1},'autosave...')
 end
 
 function _draw()
@@ -44,7 +58,7 @@ function _draw()
             end
         end
     end
-    if(_deb)print(_deb,1,120)
+    if(_deb)print(_deb,1,120,7)
 end
 
 function set_scene(s,params)
