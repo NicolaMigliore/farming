@@ -98,7 +98,9 @@ function save_state()
     dset(4,stat(84)) -- mi
 
     dset(6,_tool_i)
-    dset(7,_inventory.carrots)
+    dset(7,_player.x)
+    dset(8,_player.y)
+    dset(9,_inventory.carrots)
 
     log('save at '..dget(3)..':'..dget(4))
 end
@@ -134,5 +136,5 @@ function load_state()
     -- last time 17:19
 
     _tool_i = dget(6)
-    _inventory.carrots = dget(7)
+    _inventory.carrots = dget(9)
 end

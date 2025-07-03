@@ -42,12 +42,23 @@ function sprc(n,x,y,w,h,oc)
 
     spr(n,x,y)
 end
-function ssprc(sx,sy,sw,sh,dx,dy,dw,dh,fx)
+function ssprc(sx,sy,sw,sh,dx,dy,dw,dh,fx,oc)
     dw = dw or sw
     dh = dh or sh
     dx = dx - dw/2
     dy = dy - dh/2
     fx = fx or false
+
+    -- outline
+    if oc then
+        for i=1,15 do pal(i,oc) end
+        sspr(sx,sy,sw,sh,dx-1,dy,dw,dh,fx)
+        sspr(sx,sy,sw,sh,dx+1,dy,dw,dh,fx)
+        sspr(sx,sy,sw,sh,dx,dy-1,dw,dh,fx)
+        sspr(sx,sy,sw,sh,dx,dy+1,dw,dh,fx)
+        pal()
+    end
+
     sspr(sx,sy,sw,sh,dx,dy,dw,dh,fx)
 end
 function rectc(x,y,w,h,c)

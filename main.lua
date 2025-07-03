@@ -32,7 +32,9 @@ function _init()
 
     menuitem(1, "save", function()save_screen(_screen)end)
     load_state()
+    _player = new_p()
     set_scene('land')
+
 end
 
 function _update()
@@ -40,8 +42,8 @@ function _update()
     _effects_u()
     _timers_u()
 
-    -- -- autosave
-    -- if(time()%15==0)save_state()add_fx(64,5,60,0,0,false,false,false,nil,{7,1},'autosave...')
+    -- autosave
+    if(time()%30==0)save_state()add_fx(64,5,60,0,0,false,false,false,nil,{7,1},'autosave...')
 end
 
 function _draw()
@@ -58,7 +60,7 @@ function _draw()
             end
         end
     end
-    if(_deb)print(_deb,1,120,7)
+    if(_deb)pl(_deb,64,120,'left',7)
 end
 
 function set_scene(s,params)

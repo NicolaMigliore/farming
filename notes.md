@@ -44,7 +44,9 @@ State data and other information will be store in the cart-data structure as des
 4. Last save time - Minute
 5. Last elapsed time in minutes
 6. Last tool
-7. Inventory - Carrots
+7. Last player x
+8. Last player y
+9. Inventory - Carrots
 
 # Time
 Time is managed at the minute level to avoid overflowing numbers.

@@ -1,5 +1,5 @@
 function _land_e()
-    _cursor={cx=8,cy=8}
+    _cursor={cx=flr(_player.x/8),cy=flr(_player.y/8)}
 
     _screen=load_screen()
     update_crops(_screen)
@@ -10,9 +10,9 @@ end
 function _land_u()
 -- input
 
-    if (btnp(4)) menu_open=not menu_open add_timer('menu_toggle',.5)
+    if (btnp(4)) menu_open=not menu_open add_timer('menu_toggle',.5) _player.can_input=not menu_open
     if menu_open then
-        if(btnp(5))menu_open=false add_timer('menu_toggle',.5)
+        if(btnp(5))menu_open=false add_timer('menu_toggle',.5)_player.can_input=not menu_open
         if(btnp(⬆️))_tool_i-=1
         if(btnp(⬇️))_tool_i+=1
         if(_tool_i<1)_tool_i=#_tools
@@ -52,10 +52,17 @@ function _land_u()
             end
         end
 
-        if(btnp(➡️))_cursor.cx=min(_cursor.cx+1,15)
-        if(btnp(⬅️))_cursor.cx=max(_cursor.cx-1,0)
-        if(btnp(⬆️))_cursor.cy=max(_cursor.cy-1,0)
-        if(btnp(⬇️))_cursor.cy=min(_cursor.cy+1,15)
+        -- if(btnp(➡️))_cursor.cx=min(_cursor.cx+1,15)
+        -- if(btnp(⬅️))_cursor.cx=max(_cursor.cx-1,0)
+        -- if(btnp(⬆️))_cursor.cy=max(_cursor.cy-1,0)
+        -- if(btnp(⬇️))_cursor.cy=min(_cursor.cy+1,15)
+
+        _cursor.cx=flr(_player.x/8)
+        if(_player.d==1)_cursor.cx+=1
+        if(_player.d==2)_cursor.cx-=1
+        _cursor.cy=flr(_player.y/8)
+        if(_player.d==3)_cursor.cy-=1
+        if(_player.d==4)_cursor.cy+=1
     end
 
     -- grow
@@ -94,6 +101,8 @@ function _land_u()
             end
         end
     end)
+
+    _player:update()
 end
 
 function _land_d()
@@ -104,6 +113,8 @@ function _land_d()
     local shr=flr(sin(t()))*2
     rectc(_cursor.cx*8+4,_cursor.cy*8+4,6+shr,6+shr)
 
+    
+    _player:draw()
     
     if not menu_open then
         window(2,10,13,13)
@@ -128,11 +139,12 @@ function _land_d()
             sprc(t.s,x+w-7,ty)
         end
     end
-
+    
     -- inventory
     window(-15,110,40,20)
     sprc(14,7,121,nil,nil,1)
     pl(_inventory.carrots,16,122,'center',7,1)
+
 end
 
 function till_ground(cx,cy,ct)
