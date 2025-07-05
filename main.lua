@@ -18,7 +18,12 @@ function _init()
             drw=_land_d
         }
     }
-    _inventory={ carrots=0 }
+    _seed_types={
+        {id='seed_c',s=65},
+        {id='seed_t',s=30}
+    }
+    _seed_type_i=1
+    _inventory={ gold=5,seed_c=3,seed_t=0,carrots=0 }
     _tools={
         {l='hoe',s=64},
         {l='seeds',s=65},

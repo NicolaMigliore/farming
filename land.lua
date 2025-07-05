@@ -17,6 +17,13 @@ function _land_u()
         if(btnp(⬇️))_tool_i+=1
         if(_tool_i<1)_tool_i=#_tools
         if(_tool_i>#_tools)_tool_i=1
+        if _tool_i==2 then
+            if(btnp(⬅️))_seed_type_i-=1
+            if(btnp(➡️))_seed_type_i+=1
+            if(_seed_type_i<1)_seed_type_i=#_seed_types
+            if(_seed_type_i>#_seed_types)_seed_type_i=1
+        end
+
     else
         if btnp(5) then
             local cx,cy=_cursor.cx,_cursor.cy
@@ -123,20 +130,31 @@ function _land_d()
     end
     local menu_timer = get_timer('menu_toggle')
     if menu_timer then
-        local w = 50
+        local w = 70
         local perc = ease_in_out_back(menu_timer.perc)
         local x,y=-w+(menu_open and w*perc or w*(1-perc)),10
         window(x,y,w,y+50)
         -- tools
         for i,t in pairs(_tools) do
-            local ty=y+i*10
+            local ty=y+i*12
             if i==_tool_i then
                 rectfill(x+3,ty-5,x+w-3,ty+4,13)
                 pl(t.l,x+5,ty,'left',7,1)
             else
                 pl(t.l,x+5,ty,'left',1)
             end
-            sprc(t.s,x+w-7,ty)
+            if i==2 and i==_tool_i then
+                local cur_seed=_seed_types[_seed_type_i]
+                pl('⬅️',x+w-33,ty, 'right',7,1)
+                -- sprc(t.s,x+w-26,ty,8,8,1)
+                sprc(cur_seed.s,x+w-27,ty,8,8,1)
+                local n = '0'.._inventory[cur_seed.id]
+                n = sub(n,-2)
+                pl(n,x+w-20,ty,'left',7,1)
+                pl(' ➡️',x+w-14,ty, 'left',7,1)
+            else
+                sprc(t.s,x+w-7,ty,8,8,1)
+            end
         end
     end
     
