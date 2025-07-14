@@ -128,13 +128,8 @@ function load_state()
     else
         elapsed_time = ((d * 24) + (h * 60) + mi)
     end
-    log('------')
-    log('loaded '..dget(3)..':'..dget(4))
-    tableout(dt)
     dset(5,elapsed_time)
-
-    -- last time 17:19
-
     _tool_i = dget(6)
+    if(_tool_i<1)_tool_i=1
     _inventory.carrots = dget(9)
 end
