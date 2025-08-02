@@ -81,23 +81,28 @@ end
 
 -- print label
 function pl(text,x,y,align,c,oc)
-    text = tostr(text)
-    y = y - 3
-    c = c or 7
-    w = print(text,128,-10) - 128
-    if align=='right' then
-        x = x - w
-    elseif align=='center' then
-        x = x - w/2
+    ext = tostr(text)
+    local lines = split(text,'\n')
+    local h=7*#lines
+    y=y-flr(h/2)
+    for i,l in ipairs(lines) do
+        cx=x
+        cy = y + (i-1)*8 --- 3
+        c = c or 7
+        w = print(l,128,-10) - 128
+        if align=='right' then
+            cx = x - w
+        elseif align=='center' then
+            cx = x - w/2
+        end
+        if oc then
+            print(l,cx,cy-1,oc)
+            print(l,cx,cy+1,oc)
+            print(l,cx-1,cy,oc)
+            print(l,cx+1,cy,oc)
+        end
+        print(l,cx,cy,c)
     end
-    if oc then
-        print(text,x,y-1,oc)
-        print(text,x,y+1,oc)
-        print(text,x-1,y,oc)
-        print(text,x+1,y,oc)
-    end
-
-    print(text,x,y,c)
 end
 
 function btn_list(btns,ai)

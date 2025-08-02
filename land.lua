@@ -4,27 +4,36 @@ function _land_e()
     _screen=load_screen()
     update_crops(_screen)
 
-    menu_open=false
+    mode=1 --1:play 2:tool select 3:sell
+
+    pad_sell={
+        x=124,
+        y=4,
+        draw=function(s)
+            local w=(sin(t())+1)/2*7
+            local x1=s.x-w/2
+            local y1=s.y-w/2
+            local x2=s.x+w/2
+            local y2=s.y+w/2 
+            rectfill(s.x-4,s.y-4,s.x+3,s.y+3,7)
+            rect(x1,y1,x2,y2,8)
+            rect(x1+.4,y1+.4,x2-.4,y2-.4,8)
+        end
+    }
+    trades={
+        { give='carrots', g_icon=14, g_amount=5, take='gold', t_icon=68, t_amount=15 },
+        -- { give='carrots', g_icon=14, g_amount=10, take='gold', t_icon=68, t_amount=20 },
+        { give='gold', g_icon=68, g_amount=10, take='seed_c', t_icon=65, t_amount=5 },
+        -- { give='gold', g_icon=68, g_amount=15, take='seed_c', t_icon=65, t_amount=10 },
+    }
+    sell_i=1
 end
 
-function _land_u()
--- input
-
-    if (btnp(4)) menu_open=not menu_open add_timer('menu_toggle',.5) _player.can_input=not menu_open
-    if menu_open then
-        if(btnp(5))menu_open=false add_timer('menu_toggle',.5)_player.can_input=not menu_open
-        if(btnp(⬆️))_tool_i-=1
-        if(btnp(⬇️))_tool_i+=1
-        if(_tool_i<1)_tool_i=#_tools
-        if(_tool_i>#_tools)_tool_i=1
-        if _tool_i==2 then
-            if(btnp(⬅️))_seed_type_i-=1
-            if(btnp(➡️))_seed_type_i+=1
-            if(_seed_type_i<1)_seed_type_i=#_seed_types
-            if(_seed_type_i>#_seed_types)_seed_type_i=1
+function _land_u()    
+    if mode==1 then
+        if btnp(4) then
+            toggle_menu()
         end
-
-    else
         if btnp(5) then
             local cx,cy=_cursor.cx,_cursor.cy
             local ct = get_tile(_screen,cx,cy)
@@ -42,11 +51,10 @@ function _land_u()
                 end
             end
             -- seeds
-            if _tool_i==2 and is_dirt and not has_plant then
+            if _tool_i==2 and _inventory.seed_c>0 and is_dirt and not has_plant then
+                _inventory.seed_c-=1
                 set_harvest(_screen,cx,cy,6)
-                local t = _screen[cy][cx]
             end
-
             -- water
             if _tool_i==3 and has_plant then
                 ct.dry_timer=1
@@ -58,18 +66,47 @@ function _land_u()
                 ct:harvest()
             end
         end
-
-        -- if(btnp(➡️))_cursor.cx=min(_cursor.cx+1,15)
-        -- if(btnp(⬅️))_cursor.cx=max(_cursor.cx-1,0)
-        -- if(btnp(⬆️))_cursor.cy=max(_cursor.cy-1,0)
-        -- if(btnp(⬇️))_cursor.cy=min(_cursor.cy+1,15)
-
         _cursor.cx=flr(_player.x/8)
         if(_player.d==1)_cursor.cx+=1
         if(_player.d==2)_cursor.cx-=1
         _cursor.cy=flr(_player.y/8)
         if(_player.d==3)_cursor.cy-=1
         if(_player.d==4)_cursor.cy+=1
+    elseif mode==2 then
+        if btnp(4) then
+            toggle_menu()
+        end
+        if(btnp(5))mode=1 add_timer('menu_toggle',.5)_player.can_input= mode==1
+        if(btnp(⬆️))_tool_i-=1
+        if(btnp(⬇️))_tool_i+=1
+        if(_tool_i<1)_tool_i=#_tools
+        if(_tool_i>#_tools)_tool_i=1
+        if _tool_i==2 then
+            if(btnp(⬅️))_seed_type_i-=1
+            if(btnp(➡️))_seed_type_i+=1
+            if(_seed_type_i<1)_seed_type_i=#_seed_types
+            if(_seed_type_i>#_seed_types)_seed_type_i=1
+        end
+
+    elseif mode==3 then
+        if(btnp(4))toggle_sell()
+        if btnp(5) then
+            local trade = trades[sell_i]
+            if _inventory[trade.give]>=trade.g_amount then
+                _inventory[trade.give]-=trade.g_amount
+                _inventory[trade.take]+=trade.t_amount
+                sfx(0,-1,0,4)
+            else
+                sfx(0,-1,8,4)
+                _si+=2
+            end
+
+        end
+
+        if(btnp(⬆️))sell_i-=1
+        if(btnp(⬇️))sell_i+=1
+        if(sell_i<1)sell_i=#trades
+        if(sell_i>#trades)sell_i=1
     end
 
     -- grow
@@ -110,11 +147,21 @@ function _land_u()
     end)
 
     _player:update()
+
+    -- toggle sell
+    if  mode!=3 and _player.x==120 and _player.y==0 then
+        mode=3
+        _player.can_input=false
+        add_timer('sell_toggle',.8)
+    end
 end
 
 function _land_d()
     -- tiles
     foralltiles_s(_screen,function(tile)tile:draw()end)
+
+    -- pad_sell
+    pad_sell:draw()
 
     -- cursor
     local shr=flr(sin(t()))*2
@@ -123,30 +170,31 @@ function _land_d()
     
     _player:draw()
     
-    if not menu_open then
+    -- menu
+    if mode==1 or mode==3 then
         window(2,10,13,13)
         rectfill(4,12,13,21,13)
         sprc(_tools[_tool_i].s,9,17)
     end
+
     local menu_timer = get_timer('menu_toggle')
     if menu_timer then
-        local w = 70
-        local perc = ease_in_out_back(menu_timer.perc)
-        local x,y=-w+(menu_open and w*perc or w*(1-perc)),10
-        window(x,y,w,y+50)
-        -- tools
+        local w,perc =70,ease_in_out_back(menu_timer.perc)
+        perc= mode==2 and perc or 1-perc
+        local x,y=-w+w*perc,10
+        window(x,y,w,y+51)
+
+        pl('tools',x+w/2,y+7,'center',10,1)
+        y+=5
         for i,t in pairs(_tools) do
             local ty=y+i*12
-            if i==_tool_i then
-                rectfill(x+3,ty-5,x+w-3,ty+4,13)
-                pl(t.l,x+5,ty,'left',7,1)
-            else
-                pl(t.l,x+5,ty,'left',1)
-            end
+            local c,co=1,nil
+            if(i==_tool_i) c,co=7,1 rectfill(x+3,ty-6,x+w-3,ty+5,13)
+            pl(t.l,x+5,ty,'left',c,co)
+            
             if i==2 and i==_tool_i then
                 local cur_seed=_seed_types[_seed_type_i]
                 pl('⬅️',x+w-33,ty, 'right',7,1)
-                -- sprc(t.s,x+w-26,ty,8,8,1)
                 sprc(cur_seed.s,x+w-27,ty,8,8,1)
                 local n = '0'.._inventory[cur_seed.id]
                 n = sub(n,-2)
@@ -157,11 +205,39 @@ function _land_d()
             end
         end
     end
+
+    -- sell
+    local st = get_timer('sell_toggle')
+    if st then
+        local w,h,perc = 54,32+#trades*12,ease_in_out_back(st.perc)
+        perc= mode==3 and perc or 1-perc
+        local x,y=64-w/2,-h+(h+10)*perc
+        window(x,y,w,h)
+ 
+        pl('sell/buy',x+w/2,y+7,'center',10,1)
+        y+=5
+        for i,v in ipairs(trades) do
+            local c,oc=1,nil
+            local vx,vy=x+8,y+i*12
+            if(i==sell_i)c,oc=7,1 rectfill(x+3,vy-6,x+w-3,vy+5,13)
+
+            sprc(v.g_icon,vx,vy,nil,nil,1)
+            pl(v.g_amount,vx+8,vy,'left',c,oc)
+            sprc(v.t_icon,vx+28,vy,nil,nil,1)
+            pl(v.t_amount,vx+36,vy,'left',c,oc)
+        end
+        y+=12*#trades+7
+        line(x+w/2,y-12*#trades,x+w/2,y-3,1)
+        line(x+6,y,x+w-6,y,1)
+        pl('❎ trade\n🅾️ close',x+w/2,y+11,'center',7,1)
+    end
     
     -- inventory
-    window(-15,110,40,20)
-    sprc(14,7,121,nil,nil,1)
-    pl(_inventory.carrots,16,122,'center',7,1)
+    window(-15,110,68,20)
+    sprc(68,6,121,nil,nil,1)
+    pl(_inventory.gold,16,122,'center',7,1)
+    sprc(14,32,121,nil,nil,1)
+    pl(_inventory.carrots,45,122,'center',7,1)
 
 end
 
@@ -208,4 +284,16 @@ function till_ground(cx,cy,ct)
     -- update current
     local s = findspr(cur_f)
     _screen[cy][cx].ss.ground=s
+end
+
+function toggle_menu()
+    mode=(mode==1) and 2 or 1
+    add_timer('menu_toggle',.5)
+    _player.can_input= mode==1
+end
+function toggle_sell()
+    mode=(mode==1) and 3 or 1
+    add_timer('sell_toggle',.8)
+    _player.can_input=mode==1
+    if(mode==1)_player.y+=8
 end

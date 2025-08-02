@@ -10,6 +10,8 @@ function _init()
     _d_frame_amount = 3600 -- 2min --108000
     _g_frame_amount = 900--5400 -- 3min --108000
 
+    _si=0
+
     _last_time = {}
     _scenes = {
         land = {
@@ -23,7 +25,7 @@ function _init()
         {id='seed_t',s=30}
     }
     _seed_type_i=1
-    _inventory={ gold=5,seed_c=3,seed_t=0,carrots=0 }
+    _inventory={ gold=10,seed_c=3,seed_t=0,carrots=10 }
     _tools={
         {l='hoe',s=64},
         {l='seeds',s=65},
@@ -43,6 +45,12 @@ function _init()
 end
 
 function _update()
+    if _si>0 then
+        do_shake()
+    else
+        camera()
+    end
+
     _scenes[_mode].upd()
     _effects_u()
     _timers_u()
@@ -74,6 +82,13 @@ function set_scene(s,params)
     -- _title_cards = {}
     local params = params or {}
     _scenes[s].ent(unpack(params))
+end
+
+function do_shake()
+    local shake_x,shake_y=rnd(_si)-(_si /2),rnd(_si)-(_si /2)
+    camera( shake_x, shake_y )
+    _si *= .5
+    if _si < .3 then _si = 0 end
 end
 
 function findspr(b)
