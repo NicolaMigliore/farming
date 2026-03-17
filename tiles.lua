@@ -81,11 +81,11 @@ function update_crops(screen)
         local is_harvestable=fget(ct.ss.harvest,2)
         if is_harvestable then
             -- dry
-            local d_rate = 1/(_d_frame_amount/30/60)
+            local d_rate = 1/(get_dry_frame_amount()/30/60)
             ct.dry_timer-=d_rate * elapsed_mins
 
             -- grow
-            local g_rate = 1/(_g_frame_amount/30/60)
+            local g_rate = 1/(get_grow_frame_amount()/30/60)
             ct.grow_timer-=g_rate * elapsed_mins
         end
     end)

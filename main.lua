@@ -7,8 +7,15 @@ function _init()
     _show_empty=false
     _debug_layer=nil --'harvest'
 
-    _d_frame_amount = 3600 -- 2min --108000
-    _g_frame_amount = 900--5400 -- 3min --108000
+    _base_d_frame_amount = 3600 -- 2min --108000
+    _base_g_frame_amount = 900--5400 -- 3min --108000
+    _time_speeds = {
+        { label='test', mult=0.1 },
+        { label='fast', mult=0.5 },
+        { label='normal', mult=1 },
+        { label='slow', mult=2 }
+    }
+    _time_speed_i = 3
 
     _si=0
 
@@ -38,6 +45,7 @@ function _init()
     -- clear_data()
 
     menuitem(1, "save", function()save_screen(_screen)end)
+    menuitem(2, "game speed", cycle_time_speed)
     load_state()
     _player = new_p()
     set_scene('land')
@@ -105,4 +113,25 @@ function dtb(num)
     bin..=num\2^i %2
   end
   return bin
+end
+
+function current_time_speed()
+    return _time_speeds[_time_speed_i] or _time_speeds[1]
+end
+
+function get_dry_frame_amount()
+    return _base_d_frame_amount * current_time_speed().mult
+end
+
+function get_grow_frame_amount()
+    return _base_g_frame_amount * current_time_speed().mult
+end
+
+function cycle_time_speed()
+    _time_speed_i += 1
+    if _time_speed_i > #_time_speeds then
+        _time_speed_i = 1
+    end
+    menuitem(2, "game speed: "..current_time_speed().label, cycle_time_speed)
+    save_state()
 end

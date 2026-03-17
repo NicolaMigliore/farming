@@ -101,6 +101,7 @@ function save_state()
     dset(7,_player.x)
     dset(8,_player.y)
     dset(9,_inventory.carrots)
+    dset(10,_time_speed_i)
 
     log('save at '..dget(3)..':'..dget(4))
 end
@@ -132,4 +133,9 @@ function load_state()
     _tool_i = dget(6)
     if(_tool_i<1)_tool_i=1
     _inventory.carrots = dget(9)
+    _time_speed_i = dget(10)
+    if _time_speed_i < 1 or _time_speed_i > #_time_speeds then
+        _time_speed_i = 3
+    end
+    menuitem(2, "game speed: "..current_time_speed().label, cycle_time_speed)
 end

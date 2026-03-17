@@ -114,7 +114,7 @@ function _land_u()
         local is_harvestable=fget(tile.ss.harvest,2)
         if is_harvestable then
             -- dry
-            local d_rate=1/_d_frame_amount
+            local d_rate=1/get_dry_frame_amount()
             tile.dry_timer-=d_rate
             if tile.dry_timer<=.2 then
                 tile.ss.harvest=tile.dry_sequence[tile.grow_stage]
@@ -130,7 +130,7 @@ function _land_u()
             end
 
             -- grow
-            local g_rate = 1/_g_frame_amount
+            local g_rate = 1/get_grow_frame_amount()
             tile.grow_timer-=g_rate
             if tile.grow_timer<0 and tile.grow_stage<#tile.grow_sequence then
                 tile.grow_stage+=1
