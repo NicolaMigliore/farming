@@ -10,6 +10,8 @@ function new_p()
         dy = 0,
         spd = 1,
         d = 4,
+        queued_d = nil,
+        queued_t = 0,
         can_input=true,
         sm = {
             idle = function(s)
@@ -77,25 +79,56 @@ function new_p()
                             try_move(1,1,0)
                         else
                             p.d = 1
+                            p.queued_d = 1
+                            p.queued_t = 2
                         end
                     elseif btnp(⬅️) then
                         if p.d == 2 then
                             try_move(2,-1,0)
                         else
                             p.d = 2
+                            p.queued_d = 2
+                            p.queued_t = 2
                         end
                     elseif btnp(⬆️) then
                         if p.d == 3 then
                             try_move(3,0,-1)
                         else
                             p.d = 3
+                            p.queued_d = 3
+                            p.queued_t = 2
                         end
                     elseif btnp(⬇️) then
                         if p.d == 4 then
                             try_move(4,0,1)
                         else
                             p.d = 4
+                            p.queued_d = 4
+                            p.queued_t = 2
                         end
+                    elseif p.queued_d == 1 and btn(➡️) then
+                        p.queued_t -= 1
+                        if p.queued_t <= 0 then
+                            try_move(1,1,0)
+                        end
+                    elseif p.queued_d == 2 and btn(⬅️) then
+                        p.queued_t -= 1
+                        if p.queued_t <= 0 then
+                            try_move(2,-1,0)
+                        end
+                    elseif p.queued_d == 3 and btn(⬆️) then
+                        p.queued_t -= 1
+                        if p.queued_t <= 0 then
+                            try_move(3,0,-1)
+                        end
+                    elseif p.queued_d == 4 and btn(⬇️) then
+                        p.queued_t -= 1
+                        if p.queued_t <= 0 then
+                            try_move(4,0,1)
+                        end
+                    else
+                        p.queued_d = nil
+                        p.queued_t = 0
                     end
                 end
             end
