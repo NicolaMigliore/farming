@@ -1,6 +1,14 @@
-function save_screen(screen)
-    local ox,oy = 0,0 -- cell offsets
-    local address=0x2000
+function get_screen_map_origin(screen_i)
+    return screen_i*16,0
+end
+
+function get_screen_data_origin(screen_i)
+    return 0x4300+screen_i*16*16*3
+end
+
+function save_screen(screen,screen_i)
+    local ox,oy = get_screen_map_origin(screen_i)
+    local data_origin = get_screen_data_origin(screen_i)
     foralltiles_s(screen,function(tile,x,y,l_name)
         -- store tiles
         for i,ln in ipairs(_layer_names) do
@@ -13,20 +21,16 @@ function save_screen(screen)
         -- log('final '..@address)
 
         -- store tile state
-        local data_address = 0x4300+(x+y*16)*3
+        local data_address = data_origin+(x+y*16)*3
         poke(data_address,tile.grow_stage)
         poke(data_address+1,flr(tile.grow_timer * 100))
         local tmp_dry = tile.dry_timer*100
         if(tmp_dry ~= 0)log('dry-timer save: '..tmp_dry)
         poke(data_address+2,flr(tmp_dry))
     end)
-    cstore(0x2000,0x2000,8192)
-    cstore(0x4300,0x4300,4864)
-
-    save_state()
 end
 
-function load_screen()
+function load_screen(screen_i)
     log('loading screen')
     local screen = {}
     -- create empty tiles
@@ -37,7 +41,8 @@ function load_screen()
         end
     end
 
-    local ox,oy = 0,0 -- cell offsets
+    local ox,oy = get_screen_map_origin(screen_i)
+    local data_origin = get_screen_data_origin(screen_i)
     foralltiles_s(screen,function(tile,x,y)
         -- load tile sprites
         tile.ss={}
@@ -46,7 +51,7 @@ function load_screen()
             tile.ss[ln]=mget(ox+x,oy+y)
         end
         -- load tile state
-        local data_address = 0x4300+(x+y*16)*3
+        local data_address = data_origin+(x+y*16)*3
         tile.grow_stage = @data_address
         tile.grow_timer = @(data_address+1)/100
         local tmp_dry = @(data_address+2)/100
@@ -54,6 +59,24 @@ function load_screen()
         tile.dry_timer = tmp_dry
     end)
     return screen
+end
+
+function save_screens()
+    for screen_i=0,_screen_count-1 do
+        save_screen(_screens[screen_i+1],screen_i)
+    end
+    cstore(0x2000,0x2000,8192)
+    cstore(0x4300,0x4300,4864)
+    save_state()
+end
+
+function load_screens()
+    _screens={}
+    for screen_i=0,_screen_count-1 do
+        local screen=load_screen(screen_i)
+        update_crops(screen)
+        add(_screens,screen)
+    end
 end
 
 function clear_data()
@@ -102,6 +125,8 @@ function save_state()
     dset(8,_player.y)
     dset(9,_inventory.carrots)
     dset(10,_time_speed_i)
+    dset(11,_screen_x)
+    dset(12,_screen_y)
 
     log('save at '..dget(3)..':'..dget(4))
 end
@@ -136,6 +161,14 @@ function load_state()
     _time_speed_i = dget(10)
     if _time_speed_i < 1 or _time_speed_i > #_time_speeds then
         _time_speed_i = 3
+    end
+    _screen_x = dget(11)
+    if _screen_x < 0 or _screen_x >= _screen_w then
+        _screen_x = 0
+    end
+    _screen_y = dget(12)
+    if _screen_y < 0 or _screen_y >= _screen_h then
+        _screen_y = 0
     end
     menuitem(2, "game speed: "..current_time_speed().label, cycle_time_speed)
 end

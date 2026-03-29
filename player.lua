@@ -37,6 +37,19 @@ function new_p()
         },
         anim_i = 1,
         update = function(p)
+            local function try_move(dir,dx,dy)
+                local cx,cy=flr(p.x/8),flr(p.y/8)
+                if can_move_to(_screen_x,_screen_y,cx+dx,cy+dy) then
+                    p.d = dir
+                    p.dx = dx*p.spd
+                    p.dy = dy*p.spd
+                    p.cs = 'walk'
+                    return true
+                end
+                p.d = dir
+                return false
+            end
+
             if p.can_input then
                 if p.cs == 'walk' then
                     -- continue moving
@@ -49,10 +62,10 @@ function new_p()
                         p.dy = 0
 
                         -- check for continued input
-                        if (btn(➡️)) then p.d=1 p.dx=p.spd
-                        elseif (btn(⬅️)) then p.d=2 p.dx=-p.spd
-                        elseif (btn(⬆️)) then p.d=3 p.dy=-p.spd
-                        elseif (btn(⬇️)) then p.d=4 p.dy=p.spd
+                        if (btn(➡️)) then try_move(1,1,0)
+                        elseif (btn(⬅️)) then try_move(2,-1,0)
+                        elseif (btn(⬆️)) then try_move(3,0,-1)
+                        elseif (btn(⬇️)) then try_move(4,0,1)
                         else
                             p.cs = 'idle'
                         end
@@ -61,25 +74,25 @@ function new_p()
                     -- check for new input
                     if btnp(➡️) then
                         if p.d == 1 then
-                            p.dx = p.spd p.cs = 'walk'
+                            try_move(1,1,0)
                         else
                             p.d = 1
                         end
                     elseif btnp(⬅️) then
                         if p.d == 2 then
-                            p.dx = -p.spd p.cs = 'walk'
+                            try_move(2,-1,0)
                         else
                             p.d = 2
                         end
                     elseif btnp(⬆️) then
                         if p.d == 3 then
-                            p.dy = -p.spd p.cs = 'walk'
+                            try_move(3,0,-1)
                         else
                             p.d = 3
                         end
                     elseif btnp(⬇️) then
                         if p.d == 4 then
-                            p.dy = p.spd p.cs = 'walk'
+                            try_move(4,0,1)
                         else
                             p.d = 4
                         end
@@ -96,6 +109,7 @@ function new_p()
         draw = function(p)
             local anim_name = p.cs .. '_' .. _directions[p.d]
             local ca = p.anim[anim_name]
+            log('p.anim_i: '..tostr(p.anim_i)..'|anim_name:'..anim_name)
             local n = ca.f[flr(p.anim_i)]
             local x, y = p.x+4, p.y+4
             local sx,sy=(n%16)*8,flr(n/16)*8

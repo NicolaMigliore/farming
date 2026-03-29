@@ -27,6 +27,30 @@ Carrots take 12 hours to advance stage and 10 to dry
 To save the game map, all used tiles are set in the PICO-8 map and then stored to the cart.
 The various layers are stored one above the other in the map editor and are then re layered when loading the map.
 
+### World size and screens
+The world is currently composed of 4 screens arranged in a 2x2 grid.
+Each screen is 16x16 tiles.
+
+Screen coordinates are:
+- (0,0) top-left
+- (1,0) top-right
+- (0,1) bottom-left
+- (1,1) bottom-right
+
+During play, all screens are kept in memory and updated continuously.
+Transitions between screens swap the active screen instead of loading it at transition time.
+
+### Cart map storage
+Screens are stored in the cart map as horizontal 16-tile-wide blocks.
+
+Screen index to cart map x origin:
+- screen 0 -> x:0
+- screen 1 -> x:16
+- screen 2 -> x:32
+- screen 3 -> x:48
+
+Within each screen block, the screen layers are still stored as vertical 16-tile sections starting from y:0.
+
 ## Save tile data
 The memory address 0x4300 (general use) is used to store data about the tiles. in particular, each tile stores:
 - grow_stage: the current growth stage.
@@ -47,6 +71,14 @@ State data and other information will be store in the cart-data structure as des
 7. Last player x
 8. Last player y
 9. Inventory - Carrots
+
+# Collisions
+Collision is tile based.
+
+The player cannot move onto a tile if the sprite on that tile has flag 3 enabled.
+At the moment, this collision check is performed on the harvest layer.
+
+This relies on the current design assumption that a tile will never need to contain both a structure and a plant at the same time.
 
 # Time
 Time is managed at the minute level to avoid overflowing numbers.

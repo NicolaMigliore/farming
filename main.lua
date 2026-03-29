@@ -41,10 +41,16 @@ function _init()
     }
     _tool_i=1
     _layer_names={'ground','harvest'}
+    _screen_w=2
+    _screen_h=2
+    _screen_count=_screen_w*_screen_h
+    _screen_x=0
+    _screen_y=0
+    _screens={}
     _screen={}
     -- clear_data()
 
-    menuitem(1, "save", function()save_screen(_screen)end)
+    menuitem(1, "save", save_screens)
     menuitem(2, "game speed", cycle_time_speed)
     load_state()
     _player = new_p()
@@ -64,7 +70,7 @@ function _update()
     _timers_u()
 
     -- autosave
-    if(time()%30==0)save_state()add_fx(64,5,60,0,0,false,false,false,nil,{7,1},'autosave...')
+    if(time()%30==0)save_screens()add_fx(64,5,60,0,0,false,false,false,nil,{7,1},'autosave...')
 end
 
 function _draw()
@@ -133,5 +139,24 @@ function cycle_time_speed()
         _time_speed_i = 1
     end
     menuitem(2, "game speed: "..current_time_speed().label, cycle_time_speed)
+    save_state()
+end
+
+function get_screen_i(screen_x,screen_y)
+    return screen_x + screen_y*_screen_w
+end
+
+function transition_to_screen(screen_x,screen_y,spawn_x,spawn_y)
+    _screen_x=screen_x
+    _screen_y=screen_y
+    _screen=_screens[get_screen_i(_screen_x,_screen_y)+1]
+    _player.x=spawn_x or 0
+    _player.y=spawn_y or _player.y
+    _player.dx=0
+    _player.dy=0
+    _player.cs='idle'
+    _player.anim_i=1
+    _cursor.cx=flr(_player.x/8)
+    _cursor.cy=flr(_player.y/8)
     save_state()
 end

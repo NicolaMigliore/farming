@@ -1,8 +1,8 @@
 function _land_e()
     _cursor={cx=flr(_player.x/8),cy=flr(_player.y/8)}
 
-    _screen=load_screen()
-    update_crops(_screen)
+    load_screens()
+    _screen=_screens[get_screen_i(_screen_x,_screen_y)+1]
 
     mode=1 --1:play 2:tool select 3:sell
 
@@ -109,44 +109,26 @@ function _land_u()
         if(sell_i>#trades)sell_i=1
     end
 
-    -- grow
-    foralltiles_s(_screen,function(tile,x,y)
-        local is_harvestable=fget(tile.ss.harvest,2)
-        if is_harvestable then
-            -- dry
-            local d_rate=1/get_dry_frame_amount()
-            tile.dry_timer-=d_rate
-            if tile.dry_timer<=.2 then
-                tile.ss.harvest=tile.dry_sequence[tile.grow_stage]
-                if rnd()<.002 then
-                    tile.ss.harvest=16
-                    tile.grow_stage=1
-                    tile.grow_timer=1
-                    tile.dry_timer=1
-                    for i=0,5+rnd()*5 do
-                        add_fx(x*8+4,y*8+4,10,rnd()-.5,rnd()-1.5,true,rnd({true,false}),rnd({true,false}),1,{13,5,1})
-                    end
-                end
-            end
-
-            -- grow
-            local g_rate = 1/get_grow_frame_amount()
-            tile.grow_timer-=g_rate
-            if tile.grow_timer<0 and tile.grow_stage<#tile.grow_sequence then
-                tile.grow_stage+=1
-                tile.grow_timer=1
-                tile.ss.harvest=tile.grow_sequence[tile.grow_stage]
-
-                local c_table={7,9,10}
-                if(tile.grow_stage==#tile.grow_sequence)c_table={13,5,1}
-                for i=0,5+rnd()*5 do
-                    add_fx(x*8+4,y*8+4,10,rnd()-.5,rnd()-1.5,true,rnd({true,false}),rnd({true,false}),1,c_table)
-                end
-            end
-        end
-    end)
+    update_all_crops()
 
     _player:update()
+
+    if _player.x>=128 and _screen_x<_screen_w-1 then
+        transition_to_screen(_screen_x+1,_screen_y,0,_player.y)
+        return
+    end
+    if _player.x<0 and _screen_x>0 then
+        transition_to_screen(_screen_x-1,_screen_y,120,_player.y)
+        return
+    end
+    if _player.y>=128 and _screen_y<_screen_h-1 then
+        transition_to_screen(_screen_x,_screen_y+1,_player.x,0)
+        return
+    end
+    if _player.y<0 and _screen_y>0 then
+        transition_to_screen(_screen_x,_screen_y-1,_player.x,120)
+        return
+    end
 
     -- toggle sell
     if  mode!=3 and _player.x==120 and _player.y==0 then
