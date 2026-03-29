@@ -8,7 +8,7 @@ function _land_e()
 
     pad_sell={
         x=124,
-        y=4,
+        y=12,
         draw=function(s)
             local w=(sin(t())+1)/2*7
             local x1=s.x-w/2
@@ -131,7 +131,7 @@ function _land_u()
     end
 
     -- toggle sell
-    if  mode!=3 and _player.x==120 and _player.y==0 then
+    if mode!=3 and _screen_x==0 and _screen_y==0 and _player.x==120 and _player.y==8 then
         mode=3
         _player.can_input=false
         add_timer('sell_toggle',.8)
@@ -143,7 +143,9 @@ function _land_d()
     foralltiles_s(_screen,function(tile)tile:draw()end)
 
     -- pad_sell
-    pad_sell:draw()
+    if _screen_x==0 and _screen_y==0 then
+        pad_sell:draw()
+    end
 
     -- cursor
     local shr=flr(sin(t()))*2
