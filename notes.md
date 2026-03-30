@@ -16,6 +16,12 @@ The flags indicate the status of the harvestable
 - 5 is rotten
 - 6 is harvestable
 
+## Structure flags
+The flags indicate the status of the structure sprites
+- 4 is persistent - Will not be reset by the clear menu item
+- 5 
+- 6 
+
 # Harvestable growth
 If a tile has a harvestable planted then each frame, the tile has a 50% chance to decrease it's growth timer. When the timer reaches 0 the plant will advance to the next stage in the growth sequence.
 
@@ -57,6 +63,12 @@ The memory address 0x4300 (general use) is used to store data about the tiles. i
 - grow_timer: the current timer value until next stage.
 - dry_timer: the current hydration level of the plant.
 grow_timer and dry_timer will be multiplied by 100 when stored in order to fit in a single byte of memory.
+
+## Clear save data
+Clearing the save resets all 4 screens in the 2x2 world and clears the saved state data.
+
+Tiles are not reset if the sprite on the harvest layer has both flags 3 and 4 active.
+This is used to preserve authored map elements such as the world border while still clearing the farmable area.
 
 ## Save cart data
 State data and other information will be store in the cart-data structure as described bellow:

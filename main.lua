@@ -52,10 +52,10 @@ function _init()
 
     menuitem(1, "save", save_screens)
     menuitem(2, "game speed", cycle_time_speed)
+    menuitem(3, "clear save", reset_game_data)
     load_state()
     _player = new_p()
     set_scene('land')
-
 end
 
 function _update()

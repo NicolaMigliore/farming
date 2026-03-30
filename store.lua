@@ -31,7 +31,6 @@ function save_screen(screen,screen_i)
 end
 
 function load_screen(screen_i)
-    log('loading screen')
     local screen = {}
     -- create empty tiles
     for i=0,15 do
@@ -80,26 +79,34 @@ function load_screens()
 end
 
 function clear_data()
-    local ox,oy = 0,0 -- cell offsets
-    local address=0x2000
+    for screen_i=0,_screen_count-1 do
+        local ox,oy = get_screen_map_origin(screen_i)
+        local data_origin = get_screen_data_origin(screen_i)
 
-    for y=0,15 do
-        for x=0,15 do
-        -- store tiles
-        for i,ln in ipairs(_layer_names) do
-            local oy=(i-1)*16
-            if ln=='ground' then
-                mset(ox+x,oy+y,1)
-            else
-                mset(ox+x,oy+y,16)
+        for y=0,15 do
+            for x=0,15 do
+                local harvest_y = 16+y
+                local harvest_s = mget(ox+x,harvest_y)
+                local keep_tile = fget(harvest_s,3) and fget(harvest_s,4)
+
+                if not keep_tile then
+                    -- store tiles
+                    for i,ln in ipairs(_layer_names) do
+                        local layer_y = (i-1)*16
+                        if ln=='ground' then
+                            mset(ox+x,layer_y+y,1)
+                        else
+                            mset(ox+x,layer_y+y,16)
+                        end
+                    end
+
+                    -- store tile state
+                    local data_address = data_origin+(x+y*16)*3
+                    poke(data_address,0)
+                    poke(data_address+1,0)
+                    poke(data_address+2,0)
+                end
             end
-        end
-
-        -- store tile state
-        local data_address = 0x4300+(x+y*16)*3
-        poke(data_address,0)
-        poke(data_address+1,0)
-        poke(data_address+2,0)
         end
     end
 
@@ -107,9 +114,44 @@ function clear_data()
     cstore(0x4300,0x4300,4864)
 
     -- clear state
-    for i=0,4 do
+    for i=0,12 do
         dset(i,0)
     end
+end
+
+function reset_game_data()
+    clear_data()
+
+    _tool_i=1
+    _time_speed_i=3
+    _screen_x=0
+    _screen_y=0
+    _inventory.gold=10
+    _inventory.seed_c=3
+    _inventory.seed_t=0
+    _inventory.carrots=10
+
+    load_screens()
+    _screen=_screens[get_screen_i(_screen_x,_screen_y)+1]
+
+    if _player then
+        _player.x=64
+        _player.y=64
+        _player.dx=0
+        _player.dy=0
+        _player.d=4
+        _player.cs='idle'
+        _player.anim_i=1
+        _player.can_input=true
+    end
+
+    if _cursor then
+        _cursor.cx=flr(_player.x/8)
+        _cursor.cy=flr(_player.y/8)
+    end
+
+    menuitem(2, "game speed: "..current_time_speed().label, cycle_time_speed)
+    save_state()
 end
 
 function save_state()
