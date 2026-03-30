@@ -157,6 +157,43 @@ function window(x,y,w,h)
     rectfill(x+2,y+2,x+w-2,y+h-2,7)
 end
 
+-- draw a window with sprite/value pairs laid out horizontally
+function window_stats(x,y,w,h,items,pad,gap,tc,oc)
+    pad = pad or 6
+    gap = gap or 8
+    tc = tc or 7
+    oc = oc or 1
+
+    window(x,y,w,h)
+
+    local content_w = 0
+    for i,item in ipairs(items) do
+        local label = tostr(item.v)
+        local label_w = print(label,128,-10) - 128
+        content_w += 8 + 6 + label_w
+        if i < #items then
+            content_w += gap
+        end
+    end
+
+    local vis_x1 = max(x,0)
+    local vis_x2 = min(x+w,127)
+    local vis_w = vis_x2 - vis_x1 + 1
+    local start_x = vis_x1 + mid(pad,(vis_w - content_w)/2,w - content_w - pad)
+    local cx = start_x + 4
+    local cy = y + h/2 + 1
+    for item in all(items) do
+        sprc(item.s,cx,cy,nil,nil,oc)
+
+        local label_x = cx + 6
+        local label = tostr(item.v)
+        pl(label,label_x,cy,'left',tc,oc)
+
+        local label_w = print(label,128,-10) - 128
+        cx = label_x + label_w + gap
+    end
+end
+
 function ease_in_cubic(x)
     return x * x * x
 end

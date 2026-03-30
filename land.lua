@@ -156,9 +156,9 @@ function _land_d()
     
     -- menu
     if mode==1 or mode==3 then
-        window(2,10,13,13)
-        rectfill(4,12,13,21,13)
-        sprc(_tools[_tool_i].s,9,17)
+        window(4,10,13,13)
+        rectfill(6,12,15,21,13)
+        sprc(_tools[_tool_i].s,11,17)
     end
 
     local menu_timer = get_timer('menu_toggle')
@@ -217,11 +217,14 @@ function _land_d()
     end
     
     -- inventory
-    window(-15,110,68,20)
-    sprc(68,6,121,nil,nil,1)
-    pl(_inventory.gold,16,122,'center',7,1)
-    sprc(14,32,121,nil,nil,1)
-    pl(_inventory.carrots,45,122,'center',7,1)
+    local inv_w = 56
+    local inv_h = 16
+    local inv_bleed = 15
+    local inv_x = _player.x >= 64 and -inv_bleed or 128 - inv_w + inv_bleed
+    window_stats(inv_x,113,inv_w,inv_h,{
+        {s=68,v=_inventory.gold},
+        {s=14,v=_inventory.carrots}
+    },6,6)
 
 end
 
